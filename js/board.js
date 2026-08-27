@@ -1,6 +1,6 @@
 /**
  * Interactive Star Battle Board Renderer & Input Controller
- * Handles SVG/DOM rendering, drag interactions, touch gestures, and animations
+ * Clean, distraction-free rendering with touch drag gestures & smooth animations
  */
 
 import { CellState } from './solver.js';
@@ -26,33 +26,31 @@ export class BoardRenderer {
     this.activeTool = 'auto'; // 'auto' | 'star' | 'cross' | 'erase'
 
     this.cellElements = [];
-    this.rowHeaderElements = [];
-    this.colHeaderElements = [];
 
     this.isDragging = false;
-    this.dragTool = null; // 'cross' | 'erase' | 'star'
+    this.dragTool = null;
     this.dragVisited = new Set();
     this.hoverCell = null;
 
     this.hintCells = [];
     this.conflictCells = [];
 
-    // Region pastel colors
+    // Distinct, pleasant region palette
     this.regionColors = [
-      'rgba(59, 130, 246, 0.18)',   // blue
-      'rgba(16, 185, 129, 0.18)',   // emerald
-      'rgba(245, 158, 11, 0.18)',   // amber
-      'rgba(139, 92, 246, 0.18)',   // purple
-      'rgba(236, 72, 153, 0.18)',   // pink
-      'rgba(20, 184, 166, 0.18)',   // teal
-      'rgba(249, 115, 22, 0.18)',   // orange
-      'rgba(99, 102, 241, 0.18)',   // indigo
-      'rgba(168, 85, 247, 0.18)',   // violet
-      'rgba(234, 179, 8, 0.18)',    // yellow
-      'rgba(6, 182, 212, 0.18)',    // cyan
-      'rgba(244, 63, 94, 0.18)',    // rose
-      'rgba(132, 204, 22, 0.18)',   // lime
-      'rgba(120, 113, 108, 0.18)',  // stone
+      'rgba(59, 130, 246, 0.22)',   // blue
+      'rgba(16, 185, 129, 0.22)',   // emerald
+      'rgba(245, 158, 11, 0.22)',   // amber
+      'rgba(139, 92, 246, 0.22)',   // purple
+      'rgba(236, 72, 153, 0.22)',   // pink
+      'rgba(20, 184, 166, 0.22)',   // teal
+      'rgba(249, 115, 22, 0.22)',   // orange
+      'rgba(99, 102, 241, 0.22)',   // indigo
+      'rgba(168, 85, 247, 0.22)',   // violet
+      'rgba(234, 179, 8, 0.22)',    // yellow
+      'rgba(6, 182, 212, 0.22)',    // cyan
+      'rgba(244, 63, 94, 0.22)',    // rose
+      'rgba(132, 204, 22, 0.22)',   // lime
+      'rgba(120, 113, 108, 0.22)',  // stone
     ];
 
     this.initGlobalEvents();
@@ -107,8 +105,12 @@ export class BoardRenderer {
     this.updateCellStyles();
   }
 
+  updateCounters() {
+    // Intentionally empty for clean UI layout
+  }
+
   /**
-   * Full DOM Render
+   * Clean Full DOM Render without cluttered numbers
    */
   render() {
     this.container.innerHTML = '';
@@ -117,43 +119,7 @@ export class BoardRenderer {
     const boardWrapper = document.createElement('div');
     boardWrapper.className = 'star-board-wrapper';
 
-    // Top column header indicators (star counters)
-    const colHeaderRow = document.createElement('div');
-    colHeaderRow.className = 'board-col-headers';
-    this.colHeaderElements = [];
-
-    const cornerSpacer = document.createElement('div');
-    cornerSpacer.className = 'board-corner-spacer';
-    colHeaderRow.appendChild(cornerSpacer);
-
-    for (let c = 0; c < size; c++) {
-      const colHead = document.createElement('div');
-      colHead.className = 'board-col-header';
-      colHead.dataset.col = c;
-      this.colHeaderElements.push(colHead);
-      colHeaderRow.appendChild(colHead);
-    }
-    boardWrapper.appendChild(colHeaderRow);
-
-    // Main grid container with row headers
-    const mainRow = document.createElement('div');
-    mainRow.className = 'board-main-row';
-
-    // Row headers
-    const rowHeaderCol = document.createElement('div');
-    rowHeaderCol.className = 'board-row-headers';
-    this.rowHeaderElements = [];
-
-    for (let r = 0; r < size; r++) {
-      const rowHead = document.createElement('div');
-      rowHead.className = 'board-row-header';
-      rowHead.dataset.row = r;
-      this.rowHeaderElements.push(rowHead);
-      rowHeaderCol.appendChild(rowHead);
-    }
-    mainRow.appendChild(rowHeaderCol);
-
-    // Grid element
+    // Pure Grid element (takes 100% of the board wrapper)
     const gridEl = document.createElement('div');
     gridEl.className = 'star-grid';
     gridEl.style.setProperty('--grid-size', size);
@@ -168,10 +134,10 @@ export class BoardRenderer {
         cellEl.dataset.col = c;
         cellEl.dataset.region = this.regions[r][c];
 
-        // Apply region border thickness
+        // Apply region thick borders
         this.applyRegionBorders(cellEl, r, c);
 
-        // Apply region background
+        // Apply region background color
         const regId = this.regions[r][c];
         cellEl.style.backgroundColor = this.regionColors[regId % this.regionColors.length];
 
@@ -181,12 +147,10 @@ export class BoardRenderer {
       }
     }
 
-    mainRow.appendChild(gridEl);
-    boardWrapper.appendChild(mainRow);
+    boardWrapper.appendChild(gridEl);
     this.container.appendChild(boardWrapper);
 
     this.updateAllCellContents();
-    this.updateCounters();
   }
 
   /**
@@ -196,19 +160,15 @@ export class BoardRenderer {
     const size = this.size;
     const curRegion = this.regions[r][c];
 
-    // Top border
     if (r === 0 || this.regions[r - 1][c] !== curRegion) {
       cellEl.classList.add('border-t-region');
     }
-    // Bottom border
     if (r === size - 1 || this.regions[r + 1][c] !== curRegion) {
       cellEl.classList.add('border-b-region');
     }
-    // Left border
     if (c === 0 || this.regions[r][c - 1] !== curRegion) {
       cellEl.classList.add('border-l-region');
     }
-    // Right border
     if (c === size - 1 || this.regions[r][c + 1] !== curRegion) {
       cellEl.classList.add('border-r-region');
     }
@@ -218,7 +178,6 @@ export class BoardRenderer {
    * Bind touch and pointer events to cell
    */
   bindCellEvents(cellEl, r, c) {
-    // Prevent context menu (right click)
     cellEl.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       this.handleRightClick(r, c);
@@ -238,14 +197,11 @@ export class BoardRenderer {
       if (this.activeTool === 'auto') {
         const cur = this.grid[r][c];
         if (cur === CellState.EMPTY) {
-          // Cycle to STAR
           this.applyChange(r, c, CellState.STAR);
         } else if (cur === CellState.STAR) {
-          // Cycle to CROSS
           this.applyChange(r, c, CellState.CROSS);
-          this.dragTool = 'cross'; // Allow dragging crosses
+          this.dragTool = 'cross';
         } else {
-          // Cycle to EMPTY
           this.applyChange(r, c, CellState.EMPTY);
           this.dragTool = 'erase';
         }
@@ -301,13 +257,9 @@ export class BoardRenderer {
 
     this.grid[r][c] = newState;
     this.updateCell(r, c);
-    this.updateCounters();
     this.options.onCellChange({ r, c, oldState, newState, grid: this.grid });
   }
 
-  /**
-   * Update single cell DOM
-   */
   updateCell(r, c) {
     const el = this.cellElements[r][c];
     if (!el) return;
@@ -325,18 +277,14 @@ export class BoardRenderer {
       `;
     } else if (state === CellState.CROSS) {
       el.classList.add('has-cross');
-      el.innerHTML = `
-        <span class="cross-icon">✕</span>
-      `;
+      el.innerHTML = `<span class="cross-icon">✕</span>`;
     }
 
-    // Conflict check
     const isConflict = this.conflictCells.some(p => p.r === r && p.c === c);
     if (isConflict) {
       el.classList.add('is-conflict');
     }
 
-    // Hint check
     const hint = this.hintCells.find(p => p.r === r && p.c === c);
     if (hint) {
       el.classList.add('is-hint-target');
@@ -375,63 +323,6 @@ export class BoardRenderer {
     }
   }
 
-  /**
-   * Update row & col star count badges
-   */
-  updateCounters() {
-    const size = this.size;
-    const k = this.stars;
-
-    const rowCounts = new Array(size).fill(0);
-    const colCounts = new Array(size).fill(0);
-
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        if (this.grid[r][c] === CellState.STAR) {
-          rowCounts[r]++;
-          colCounts[c]++;
-        }
-      }
-    }
-
-    // Update row headers
-    for (let r = 0; r < size; r++) {
-      const el = this.rowHeaderElements[r];
-      if (!el) continue;
-      const count = rowCounts[r];
-      el.classList.remove('is-satisfied', 'is-overfilled');
-      if (count === k) {
-        el.classList.add('is-satisfied');
-        el.innerHTML = `<span>${count}</span><span class="check-mark">✓</span>`;
-      } else if (count > k) {
-        el.classList.add('is-overfilled');
-        el.innerHTML = `<span>${count}/${k}</span>`;
-      } else {
-        el.innerHTML = `<span>${count}/${k}</span>`;
-      }
-    }
-
-    // Update col headers
-    for (let c = 0; c < size; c++) {
-      const el = this.colHeaderElements[c];
-      if (!el) continue;
-      const count = colCounts[c];
-      el.classList.remove('is-satisfied', 'is-overfilled');
-      if (count === k) {
-        el.classList.add('is-satisfied');
-        el.innerHTML = `<span>${count}</span><span class="check-mark">✓</span>`;
-      } else if (count > k) {
-        el.classList.add('is-overfilled');
-        el.innerHTML = `<span>${count}/${k}</span>`;
-      } else {
-        el.innerHTML = `<span>${count}/${k}</span>`;
-      }
-    }
-  }
-
-  /**
-   * Highlight row, column and region on hover
-   */
   highlightHoverUnits(r, c) {
     const curRegion = this.regions[r][c];
     for (let row = 0; row < this.size; row++) {
@@ -440,7 +331,7 @@ export class BoardRenderer {
         if (!el) continue;
         el.classList.remove('hover-row', 'hover-col', 'hover-region');
         if (row === r && col === c) {
-          // target cell
+          // target
         } else if (this.regions[row][col] === curRegion) {
           el.classList.add('hover-region');
         } else if (row === r) {
