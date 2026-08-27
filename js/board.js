@@ -100,7 +100,7 @@ export class BoardRenderer {
     this.regions = regions;
     this.grid = grid;
     this.solution = solution;
-    this.conflicts.clear();
+    this.conflicts = new Set();
     this.lastTap = null;
     this.render();
   }
@@ -283,7 +283,9 @@ export class BoardRenderer {
     if (!cellEl) return;
 
     const val = this.grid[r][c];
-    const isConflict = this.conflicts.has(`${r},${c}`);
+    const isConflict = this.conflicts && (typeof this.conflicts.has === 'function')
+      ? this.conflicts.has(`${r},${c}`)
+      : false;
 
     cellEl.innerHTML = '';
     cellEl.classList.toggle('is-conflict', isConflict);
@@ -307,8 +309,21 @@ export class BoardRenderer {
     }
   }
 
-  setConflicts(conflictSet) {
-    this.conflicts = conflictSet;
+  setConflicts(conflictList) {
+    this.conflicts = new Set();
+    if (conflictList) {
+      if (Array.isArray(conflictList)) {
+        for (const item of conflictList) {
+          if (typeof item === 'string') {
+            this.conflicts.add(item);
+          } else if (item && typeof item.r === 'number' && typeof item.c === 'number') {
+            this.conflicts.add(`${item.r},${item.c}`);
+          }
+        }
+      } else if (conflictList instanceof Set) {
+        this.conflicts = new Set(conflictList);
+      }
+    }
     this.updateAllCellContents();
   }
 
@@ -335,8 +350,17 @@ export class BoardRenderer {
     }
   }
 
-  highlightCells(cells, className = 'is-hint-target') {
+  setHints(cells) {
+    this.highlightCells(cells, 'is-hint-target');
+  }
+
+  clearHints() {
+    this.clearHighlights('is-hint-target');
+  }
+
+  highlightCells(cells = [], className = 'is-hint-target') {
     this.clearHighlights(className);
+    if (!Array.isArray(cells)) return;
     for (const { r, c } of cells) {
       const el = this.cellElements[r]?.[c];
       if (el) el.classList.add(className);

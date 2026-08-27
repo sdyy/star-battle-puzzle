@@ -775,16 +775,17 @@ export class StarBattleGame {
     if (!listEl) return;
 
     listEl.innerHTML = '';
-    const diffs = ['easy', 'medium', 'hard', 'expert', 'master'];
+    const diffs = Object.keys(DIFFICULTY_CONFIG);
 
     diffs.forEach((d) => {
       const cfg = DIFFICULTY_CONFIG[d];
+      if (!cfg) return;
       const s = stats[d] || { wins: 0, bestTime: null };
       const card = document.createElement('div');
       card.className = 'stats-card';
       card.innerHTML = `
         <div class="stats-card-header">
-          <span class="stats-icon">${cfg.icon}</span>
+          <span class="stats-icon">⭐</span>
           <span class="stats-name">${cfg.name} (${cfg.size}x${cfg.size})</span>
         </div>
         <div class="stats-card-body">
