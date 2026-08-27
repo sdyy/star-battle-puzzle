@@ -6,7 +6,7 @@
   <title>Star Battle Puzzle | 星陣物語 - 雙星與單星邏輯益智遊戲</title>
   <meta name="description" content="精美的 Star Battle (Two Not Touch / Queens) 邏輯益智網頁遊戲，支援 6x6、8x8、10x10、12x12 單星與雙星難度、計時、提示與手機極致手感！" />
   <meta name="theme-color" content="#0b1120" />
-  <link rel="stylesheet" href="css/style.css?v=3.5" />
+  <link rel="stylesheet" href="css/style.css?v=4.0" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭐</text></svg>" />
 </head>
 <body class="theme-dark">
@@ -27,7 +27,7 @@
           <option value="hard_2">🔥 雙星 (10x10 · 2星)</option>
           <option value="expert_1">👑 專家 (12x12 · 1星)</option>
           <option value="expert_2">👑 雙星 (12x12 · 2星)</option>
-          <option value="master">🌌 大師 (14x14 · 3星)</option>
+          <option value="master">🌌 大師 (10x10 · 1星)</option>
           <option value="daily">📅 每日挑戰 (1星)</option>
         </select>
       </div>
@@ -78,19 +78,19 @@
     <footer class="bottom-control-area">
       <!-- Row 1: Tools (4 buttons) -->
       <div class="tool-row">
-        <button class="tool-btn active" data-tool="auto" title="循環切換 (空 -> 星 -> 叉)">
+        <button class="tool-btn active" data-tool="auto" title="手感模式 (連點放星/單點填消X/滑動連續)">
           <span class="tool-icon">⚡</span>
-          <span class="tool-text">自動循環</span>
+          <span class="tool-text">極速手感</span>
         </button>
-        <button class="tool-btn" data-tool="star" title="放置星星">
+        <button class="tool-btn" data-tool="star" title="星星工具">
           <span class="tool-icon">⭐</span>
           <span class="tool-text">星星</span>
         </button>
-        <button class="tool-btn" data-tool="cross" title="劃叉 (可滑動連續劃叉)">
+        <button class="tool-btn" data-tool="cross" title="叉叉工具">
           <span class="tool-icon">✕</span>
           <span class="tool-text">叉叉</span>
         </button>
-        <button class="tool-btn" data-tool="erase" title="清除格子">
+        <button class="tool-btn" data-tool="erase" title="清除工具">
           <span class="tool-icon">🧹</span>
           <span class="tool-text">清除</span>
         </button>
@@ -124,30 +124,32 @@
   <div id="rules-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="rules-title">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 id="rules-title" class="modal-title">📖 Star Battle 遊戲規則</h3>
+        <h3 id="rules-title" class="modal-title">📖 Star Battle 遊戲規則與手感</h3>
         <button class="modal-close-btn icon-btn-sm" aria-label="關閉">&times;</button>
       </div>
       <div class="modal-body">
         <h4>🎯 核心規則</h4>
         <ul>
-          <li><strong>行與列限制</strong>：每一橫列與每一直行，必須恰好放置指定數量的星星 ⭐（1星或2星）。</li>
+          <li><strong>行與列限制</strong>：每一橫列與每一直行，必須恰好放置指定數量的星星 ⭐（單星或雙星）。</li>
           <li><strong>區域限制</strong>：棋盤劃分為不同的粗線色塊區域，<strong>每個區域</strong>也必須恰好放置指定數量的星星 ⭐。</li>
           <li><strong>不相鄰原則 (Two Not Touch)</strong>：任何兩顆星星<strong>不能相鄰</strong>，無論是上下、左右，還是<strong>對角線 8 個相鄰方向</strong>都不能碰在一起！</li>
         </ul>
 
-        <h4>🎮 操作手感教學</h4>
+        <h4>🎮 手機與電腦極速手感</h4>
         <ul>
-          <li><strong>電腦操作</strong>：
+          <li>⚡ <strong>連點兩下 (Double Tap)</strong>：快速在同一格點兩下，直接放置 / 移除星星 ⭐。</li>
+          <li>👆 <strong>單點一下 (Single Tap)</strong>：點擊空白格標記 ✕ 叉叉；點擊已有 ✕ 或 ⭐ 則立即清除為空白。</li>
+          <li>🖐️ <strong>滑動拖曳 (Swipe Drag)</strong>：
             <ul>
-              <li>滑鼠左鍵：在「空」➜「⭐」➜「✖」循環。</li>
-              <li>滑鼠右鍵：直接標記「✖」。</li>
-              <li>鍵盤快捷鍵：方向鍵導航、<code>Space</code> (放星)、<code>X</code> (標叉)、<code>Z</code> (復原)。</li>
+              <li>按住<strong>空白格</strong>並滑動：經過的所有格子<strong>連續填入 ✕</strong>。</li>
+              <li>按住<strong>✕ 叉叉格</strong>並滑動：經過的所有 ✕ 格子<strong>連續清除</strong>。</li>
             </ul>
           </li>
-          <li><strong>手機操作</strong>：
+          <li>🖱️ <strong>電腦滑鼠/鍵盤</strong>：
             <ul>
-              <li>點擊下方「星星」或「叉叉」工具。</li>
-              <li>切換到「叉叉」模式後，可在棋盤上<strong>滑動拖曳 (Swipe/Drag)</strong> 連續劃叉！</li>
+              <li>滑鼠左鍵：單點標✕/連點放星/拖曳連續劃叉。</li>
+              <li>滑鼠右鍵：直接標記 ✕ 叉叉。</li>
+              <li>鍵盤快捷鍵：方向鍵導航、<code>Space</code> (放星)、<code>X</code> (標叉)、<code>Z</code> (復原)。</li>
             </ul>
           </li>
         </ul>
@@ -266,6 +268,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/game.js?v=3.5"></script>
+  <script type="module" src="js/game.js?v=4.0"></script>
 </body>
 </html>

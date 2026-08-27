@@ -348,12 +348,31 @@ body {
 
 /* Cross Icon */
 .cross-icon {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 900;
-  color: var(--text-muted);
-  opacity: 0.85;
+  color: #ffffff;
+  opacity: 0.95;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.4);
   animation: cross-fade 0.12s ease;
   line-height: 1;
+}
+
+body.theme-light .cross-icon {
+  color: #0f172a;
+  opacity: 0.95;
+  text-shadow: none;
+}
+
+body.theme-nebula .cross-icon {
+  color: #f0abfc;
+  opacity: 1;
+  text-shadow: 0 0 4px rgba(240, 171, 252, 0.6);
+}
+
+body.theme-paper .cross-icon {
+  color: #1c1917;
+  opacity: 1;
+  text-shadow: none;
 }
 
 @keyframes cross-fade {
