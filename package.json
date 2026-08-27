@@ -1,5 +1,8 @@
 {
+  "name": "star-battle-puzzle",
+  "version": "1.0.0",
+  "type": "module",
   "devDependencies": {
-    "puppeteer-core": "^25.9.0"
+    "puppeteer-core": "^24.40.0"
   }
 }
