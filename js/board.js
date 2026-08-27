@@ -1,6 +1,10 @@
 /**
  * Star Battle Board Renderer & Gesture Event Controller
- * Renders grid, handles Single Tap (X / Remove), Double Tap (Star ⭐), and Drag Fill/Erase
+ * Full mobile touch and desktop pointer support:
+ * - Single Tap: ✖ / Clear
+ * - Double Tap (within 320ms): ⭐ Star
+ * - Swipe / Drag from Empty: Continuous fill ✖ across touch movement
+ * - Swipe / Drag from X: Continuous clear ✖ across touch movement
  */
 
 import { CellState } from './solver.js';
@@ -49,16 +53,40 @@ export class BoardRenderer {
   }
 
   initGlobalEvents() {
-    window.addEventListener('pointerup', () => {
+    // Window pointermove with document.elementFromPoint allows continuous swipe across cells on mobile touchscreens!
+    const handleMove = (clientX, clientY) => {
+      if (!this.isDragging || !this.dragTool) return;
+      const target = document.elementFromPoint(clientX, clientY);
+      const cellEl = target ? target.closest('.star-cell') : null;
+      if (cellEl) {
+        const r = parseInt(cellEl.dataset.r, 10);
+        const c = parseInt(cellEl.dataset.c, 10);
+        if (!isNaN(r) && !isNaN(c)) {
+          this.handleCellDrag(r, c);
+        }
+      }
+    };
+
+    window.addEventListener('pointermove', (e) => {
+      handleMove(e.clientX, e.clientY);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+
+    const endDrag = () => {
       this.isDragging = false;
       this.dragTool = null;
       this.dragVisited.clear();
-    });
-    window.addEventListener('pointercancel', () => {
-      this.isDragging = false;
-      this.dragTool = null;
-      this.dragVisited.clear();
-    });
+    };
+
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+    window.addEventListener('touchend', endDrag);
+    window.addEventListener('touchcancel', endDrag);
   }
 
   setActiveTool(tool) {
@@ -145,8 +173,8 @@ export class BoardRenderer {
     });
 
     cellEl.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
       if (e.button === 2) {
+        e.preventDefault();
         this.handleRightClick(r, c);
         return;
       }
@@ -199,32 +227,32 @@ export class BoardRenderer {
       }
     });
 
-    cellEl.addEventListener('pointerenter', (e) => {
+    cellEl.addEventListener('pointerenter', () => {
       this.hoverCell = { r, c };
       this.highlightHoverUnits(r, c);
-
-      if (this.isDragging && this.dragTool) {
-        const key = `${r},${c}`;
-        if (!this.dragVisited.has(key)) {
-          this.dragVisited.add(key);
-          this.lastTap = null; // Dragging invalidates previous double tap
-
-          if (this.dragTool === 'cross') {
-            if (this.grid[r][c] === CellState.EMPTY) {
-              this.applyChange(r, c, CellState.CROSS);
-            }
-          } else if (this.dragTool === 'erase') {
-            if (this.grid[r][c] === CellState.CROSS) {
-              this.applyChange(r, c, CellState.EMPTY);
-            }
-          }
-        }
-      }
     });
 
     cellEl.addEventListener('pointerleave', () => {
       this.clearHoverHighlight();
     });
+  }
+
+  handleCellDrag(r, c) {
+    const key = `${r},${c}`;
+    if (!this.dragVisited.has(key)) {
+      this.dragVisited.add(key);
+      this.lastTap = null; // Dragging invalidates previous double tap
+
+      if (this.dragTool === 'cross') {
+        if (this.grid[r][c] === CellState.EMPTY) {
+          this.applyChange(r, c, CellState.CROSS);
+        }
+      } else if (this.dragTool === 'erase') {
+        if (this.grid[r][c] === CellState.CROSS) {
+          this.applyChange(r, c, CellState.EMPTY);
+        }
+      }
+    }
   }
 
   handleRightClick(r, c) {
@@ -246,7 +274,7 @@ export class BoardRenderer {
   }
 
   updateCell(r, c) {
-    const cellEl = this.cellElements[r][c];
+    const cellEl = this.cellElements[r]?.[c];
     if (!cellEl) return;
 
     const val = this.grid[r][c];
@@ -280,15 +308,15 @@ export class BoardRenderer {
   }
 
   highlightHoverUnits(r, c) {
-    const regId = this.regions[r][c];
+    const regId = this.regions[r]?.[c];
     for (let row = 0; row < this.size; row++) {
       for (let col = 0; col < this.size; col++) {
-        const el = this.cellElements[row][col];
+        const el = this.cellElements[row]?.[col];
         if (!el) continue;
         el.classList.remove('hover-row', 'hover-col', 'hover-region');
         if (row === r) el.classList.add('hover-row');
         if (col === c) el.classList.add('hover-col');
-        if (this.regions[row][col] === regId) el.classList.add('hover-region');
+        if (this.regions[row]?.[col] === regId) el.classList.add('hover-region');
       }
     }
   }
@@ -296,7 +324,7 @@ export class BoardRenderer {
   clearHoverHighlight() {
     for (let row = 0; row < this.size; row++) {
       for (let col = 0; col < this.size; col++) {
-        const el = this.cellElements[row][col];
+        const el = this.cellElements[row]?.[col];
         if (el) el.classList.remove('hover-row', 'hover-col', 'hover-region');
       }
     }
@@ -320,6 +348,6 @@ export class BoardRenderer {
   }
 
   updateCounters() {
-    // No-op clean board without outside counters
+    // Clean board
   }
 }

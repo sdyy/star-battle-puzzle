@@ -16,8 +16,9 @@ export class StarBattleGame {
     this.solver = null;
 
     // Game state
-    this.difficulty = localStorage.getItem('sb_difficulty') || 'easy';
-    this.isDaily = false;
+    const savedDiff = localStorage.getItem('sb_difficulty') || 'hard_1';
+    this.difficulty = this.normalizeDifficulty(savedDiff);
+    this.isDaily = this.difficulty === 'daily';
     this.dailySeedInfo = null;
 
     this.size = 6;
@@ -341,6 +342,13 @@ export class StarBattleGame {
     this.board.highlightHoverUnits(r, c);
   }
 
+  normalizeDifficulty(diff) {
+    if (diff === 'hard') return 'hard_1';
+    if (diff === 'expert') return 'expert_1';
+    if (DIFFICULTY_CONFIG && DIFFICULTY_CONFIG[diff]) return diff;
+    return 'hard_1';
+  }
+
   /**
    * Start New Game / Reset Board
    */
@@ -356,7 +364,10 @@ export class StarBattleGame {
     this.updateTimerDisplay();
     this.hintBanner.classList.remove('show');
 
-    const config = DIFFICULTY_CONFIG[this.difficulty] || DIFFICULTY_CONFIG.easy;
+    this.difficulty = this.normalizeDifficulty(this.difficulty);
+    if (this.difficultySelect) this.difficultySelect.value = this.difficulty;
+
+    const config = DIFFICULTY_CONFIG[this.difficulty] || DIFFICULTY_CONFIG.hard_1;
     this.size = config.size;
     this.stars = config.stars;
 
@@ -367,6 +378,7 @@ export class StarBattleGame {
       const subtitle = document.getElementById('daily-badge');
       if (subtitle) subtitle.textContent = `📅 每日挑戰 (${this.dailySeedInfo.dateString})`;
     } else {
+      seed = Math.floor(Math.random() * 1000000) + 1;
       const subtitle = document.getElementById('daily-badge');
       if (subtitle) subtitle.textContent = '';
     }
@@ -408,7 +420,7 @@ export class StarBattleGame {
       try {
         const data = JSON.parse(saved);
         if (data && data.size && data.regions && data.grid && !data.isGameOver) {
-          this.difficulty = data.difficulty || 'easy';
+          this.difficulty = this.normalizeDifficulty(data.difficulty);
           this.isDaily = data.isDaily || false;
           this.size = data.size;
           this.stars = data.stars;

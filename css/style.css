@@ -437,6 +437,8 @@ body.theme-paper .cross-icon {
   justify-content: center;
   gap: 4px;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: all var(--transition-fast);
   min-width: 0;
   white-space: nowrap;
@@ -474,6 +476,8 @@ body.theme-paper .cross-icon {
   justify-content: center;
   gap: 2px;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: all var(--transition-fast);
   font-family: inherit;
   padding: 0 2px;
