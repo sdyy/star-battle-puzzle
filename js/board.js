@@ -2,7 +2,7 @@
  * Star Battle Board Renderer & Gesture Event Controller
  * Full mobile touch and desktop pointer support:
  * - Single Tap: ✖ / Clear
- * - Double Tap (within 320ms): ⭐ Star
+ * - Double Tap (within 380ms on same cell): ⭐ Star
  * - Swipe / Drag from Empty: Continuous fill ✖ across touch movement
  * - Swipe / Drag from X: Continuous clear ✖ across touch movement
  */
@@ -31,6 +31,7 @@ export class BoardRenderer {
     this.dragTool = null; // 'cross' or 'erase'
     this.dragVisited = new Set();
     this.lastTap = null; // { r, c, time } for double-tap detection
+    this.pointerStartCell = null;
 
     this.regionColors = [
       'rgba(59, 130, 246, 0.22)',   // Blue
@@ -53,7 +54,6 @@ export class BoardRenderer {
   }
 
   initGlobalEvents() {
-    // Window pointermove with document.elementFromPoint allows continuous swipe across cells on mobile touchscreens!
     const handleMove = (clientX, clientY) => {
       if (!this.isDragging || !this.dragTool) return;
       const target = document.elementFromPoint(clientX, clientY);
@@ -81,6 +81,7 @@ export class BoardRenderer {
       this.isDragging = false;
       this.dragTool = null;
       this.dragVisited.clear();
+      this.pointerStartCell = null;
     };
 
     window.addEventListener('pointerup', endDrag);
@@ -162,7 +163,7 @@ export class BoardRenderer {
   /**
    * Bind gesture and pointer events to cell:
    * - Single Tap: ✖ / Remove
-   * - Double Tap (within 320ms): ⭐ Star
+   * - Double Tap (within 380ms on same cell): ⭐ Star
    * - Swipe / Drag from Empty: Continuous fill ✖
    * - Swipe / Drag from X: Continuous remove ✖
    */
@@ -180,19 +181,23 @@ export class BoardRenderer {
       }
 
       this.isDragging = true;
+      this.pointerStartCell = { r, c };
       this.dragVisited.clear();
       this.dragVisited.add(`${r},${c}`);
+
+      const startState = this.grid[r][c];
+      this.dragTool = startState === CellState.CROSS ? 'erase' : 'cross';
 
       const now = Date.now();
       const isDoubleTap = this.lastTap &&
         this.lastTap.r === r &&
         this.lastTap.c === c &&
-        (now - this.lastTap.time) < 320;
+        (now - this.lastTap.time) < 380;
 
       if (isDoubleTap) {
         // Double Tap: Toggle Star ⭐
         this.lastTap = null;
-        this.dragTool = null;
+        this.dragTool = null; // Do not drag on double tap
         const target = this.grid[r][c] === CellState.STAR ? CellState.EMPTY : CellState.STAR;
         this.applyChange(r, c, target);
         return;
@@ -202,23 +207,19 @@ export class BoardRenderer {
       this.lastTap = { r, c, time: now };
 
       if (this.activeTool === 'auto') {
-        const cur = this.grid[r][c];
-        if (cur === CellState.EMPTY) {
+        if (startState === CellState.EMPTY) {
           this.applyChange(r, c, CellState.CROSS);
-          this.dragTool = 'cross';
-        } else if (cur === CellState.CROSS) {
+        } else if (startState === CellState.CROSS) {
           this.applyChange(r, c, CellState.EMPTY);
-          this.dragTool = 'erase';
-        } else if (cur === CellState.STAR) {
+        } else if (startState === CellState.STAR) {
           this.applyChange(r, c, CellState.EMPTY);
-          this.dragTool = 'erase';
         }
       } else if (this.activeTool === 'star') {
-        const target = this.grid[r][c] === CellState.STAR ? CellState.EMPTY : CellState.STAR;
+        const target = startState === CellState.STAR ? CellState.EMPTY : CellState.STAR;
         this.applyChange(r, c, target);
         this.dragTool = null;
       } else if (this.activeTool === 'cross') {
-        const target = this.grid[r][c] === CellState.CROSS ? CellState.EMPTY : CellState.CROSS;
+        const target = startState === CellState.CROSS ? CellState.EMPTY : CellState.CROSS;
         this.applyChange(r, c, target);
         this.dragTool = target === CellState.CROSS ? 'cross' : 'erase';
       } else if (this.activeTool === 'erase') {
@@ -241,7 +242,11 @@ export class BoardRenderer {
     const key = `${r},${c}`;
     if (!this.dragVisited.has(key)) {
       this.dragVisited.add(key);
-      this.lastTap = null; // Dragging invalidates previous double tap
+
+      // Only invalidate double-tap if moving into a different cell
+      if (!this.pointerStartCell || this.pointerStartCell.r !== r || this.pointerStartCell.c !== c) {
+        this.lastTap = null;
+      }
 
       if (this.dragTool === 'cross') {
         if (this.grid[r][c] === CellState.EMPTY) {
