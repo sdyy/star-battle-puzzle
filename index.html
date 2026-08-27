@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Star Battle Puzzle | 星陣物語 - 雙星邏輯益智遊戲</title>
-  <meta name="description" content="精美的 Star Battle (Two Not Touch) 雙星邏輯益智網頁遊戲，支援電腦與手機、多種難度、即時題目生成、計時與智慧提示！" />
-  <meta name="theme-color" content="#0f172a" />
-  <link rel="stylesheet" href="css/style.css" />
+  <title>Star Battle Puzzle | 星陣物語 - 雙星與單星邏輯益智遊戲</title>
+  <meta name="description" content="精美的 Star Battle (Two Not Touch / Queens) 邏輯益智網頁遊戲，支援 6x6、8x8、10x10、12x12 單星與雙星難度、計時、提示與手機極致手感！" />
+  <meta name="theme-color" content="#0b1120" />
+  <link rel="stylesheet" href="css/style.css?v=3.5" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭐</text></svg>" />
 </head>
 <body class="theme-dark">
   <div class="app-container">
-    <!-- Compact Top Bar -->
+    <!-- Top Navigation Header -->
     <header class="top-nav-bar">
       <div class="brand">
         <span class="brand-icon">⭐</span>
@@ -23,30 +23,32 @@
         <select id="difficulty-select" class="difficulty-select" aria-label="選擇遊戲難度">
           <option value="easy">🌱 入門 (6x6 · 1星)</option>
           <option value="medium">⚔️ 中等 (8x8 · 1星)</option>
-          <option value="hard">🔥 困難 (10x10 · 2星)</option>
-          <option value="expert">👑 專家 (12x12 · 2星)</option>
+          <option value="hard_1" selected>🔥 困難 (10x10 · 1星)</option>
+          <option value="hard_2">🔥 雙星 (10x10 · 2星)</option>
+          <option value="expert_1">👑 專家 (12x12 · 1星)</option>
+          <option value="expert_2">👑 雙星 (12x12 · 2星)</option>
           <option value="master">🌌 大師 (14x14 · 3星)</option>
-          <option value="daily">📅 每日挑戰</option>
+          <option value="daily">📅 每日挑戰 (1星)</option>
         </select>
       </div>
 
-      <!-- Compact Timer -->
-      <div class="nav-timer" id="btn-pause" title="點擊暫停/繼續">
-        <span class="timer-icon">⏱️</span>
-        <span id="timer-display" class="timer-display">00:00</span>
-      </div>
-
-      <!-- Modal Action Buttons -->
-      <div class="nav-actions">
-        <button id="btn-open-rules" class="icon-btn-sm" title="規則說明" aria-label="規則說明">📖</button>
-        <button id="btn-open-stats" class="icon-btn-sm" title="成績統計" aria-label="成績統計">📊</button>
-        <button id="btn-open-settings" class="icon-btn-sm" title="遊戲設定" aria-label="遊戲設定">⚙️</button>
+      <!-- Timer & Actions -->
+      <div class="top-right-group">
+        <div class="nav-timer" id="btn-pause" title="點擊暫停/繼續">
+          <span class="timer-icon">⏱️</span>
+          <span id="timer-display" class="timer-display">00:00</span>
+        </div>
+        <div class="nav-actions">
+          <button id="btn-open-rules" class="icon-btn-sm" title="規則說明" aria-label="規則說明">📖</button>
+          <button id="btn-open-stats" class="icon-btn-sm" title="成績統計" aria-label="成績統計">📊</button>
+          <button id="btn-open-settings" class="icon-btn-sm" title="遊戲設定" aria-label="遊戲設定">⚙️</button>
+        </div>
       </div>
     </header>
 
     <div id="daily-badge" class="daily-badge"></div>
 
-    <!-- Main Board Area (Dynamically centered & fitted) -->
+    <!-- Main Game Area -->
     <main class="game-play-area">
       <!-- Hint Floating Banner -->
       <div id="hint-banner" class="hint-banner">
@@ -60,22 +62,22 @@
         </div>
       </div>
 
-      <!-- Clean Board Wrapper -->
+      <!-- Centered Crisp Grid Board -->
       <div id="board-container" class="board-container">
-        <!-- Injected via JS -->
+        <!-- Injected via BoardRenderer -->
       </div>
 
       <!-- Pause Overlay -->
       <div id="pause-overlay" class="pause-overlay">
         <h2 class="pause-title">遊戲暫停中</h2>
-        <button id="btn-resume" class="btn btn-primary" style="padding: 10px 22px; font-size: 1rem;">▶️ 繼續遊戲</button>
+        <button id="btn-resume" class="btn btn-primary" style="padding: 10px 24px; font-size: 1rem;">▶️ 繼續遊戲</button>
       </div>
     </main>
 
-    <!-- Compact Bottom Control Area -->
+    <!-- Bottom Controls (Two Clean Rows) -->
     <footer class="bottom-control-area">
-      <!-- Tool Row -->
-      <div class="tool-row" aria-label="模式工具">
+      <!-- Row 1: Tools (4 buttons) -->
+      <div class="tool-row">
         <button class="tool-btn active" data-tool="auto" title="循環切換 (空 -> 星 -> 叉)">
           <span class="tool-icon">⚡</span>
           <span class="tool-text">自動循環</span>
@@ -88,13 +90,13 @@
           <span class="tool-icon">✕</span>
           <span class="tool-text">叉叉</span>
         </button>
-        <button class="tool-btn" data-tool="erase" title="清除">
+        <button class="tool-btn" data-tool="erase" title="清除格子">
           <span class="tool-icon">🧹</span>
           <span class="tool-text">清除</span>
         </button>
       </div>
 
-      <!-- Action Row -->
+      <!-- Row 2: Actions (6 buttons) -->
       <div class="action-row">
         <button id="btn-undo" class="action-btn" title="復原 (Ctrl+Z)" disabled>
           <span>↩️</span> 復原
@@ -102,13 +104,13 @@
         <button id="btn-redo" class="action-btn" title="重做 (Ctrl+Y)" disabled>
           <span>↪️</span> 重做
         </button>
-        <button id="btn-hint" class="action-btn btn-highlight-gold" title="提示 (H)">
+        <button id="btn-hint" class="action-btn btn-highlight-gold" title="智慧提示 (H)">
           <span>💡</span> 提示
         </button>
         <button id="btn-check" class="action-btn" title="檢查衝突">
           <span>🔍</span> 檢查
         </button>
-        <button id="btn-restart" class="action-btn" title="重設此題">
+        <button id="btn-restart" class="action-btn" title="重設此局">
           <span>🔄</span> 重置
         </button>
         <button id="btn-new-game" class="action-btn btn-highlight-blue" title="全新題目">
@@ -128,8 +130,8 @@
       <div class="modal-body">
         <h4>🎯 核心規則</h4>
         <ul>
-          <li><strong>行與列限制</strong>：每一行 (橫列) 與每一列 (直行) 必須恰好放置指定數量的星星 ⭐。</li>
-          <li><strong>區域限制</strong>：棋盤劃分為不同的粗線色塊區域，<strong>每個區域</strong>內也必須恰好放置指定數量的星星 ⭐。</li>
+          <li><strong>行與列限制</strong>：每一橫列與每一直行，必須恰好放置指定數量的星星 ⭐（1星或2星）。</li>
+          <li><strong>區域限制</strong>：棋盤劃分為不同的粗線色塊區域，<strong>每個區域</strong>也必須恰好放置指定數量的星星 ⭐。</li>
           <li><strong>不相鄰原則 (Two Not Touch)</strong>：任何兩顆星星<strong>不能相鄰</strong>，無論是上下、左右，還是<strong>對角線 8 個相鄰方向</strong>都不能碰在一起！</li>
         </ul>
 
@@ -144,7 +146,7 @@
           </li>
           <li><strong>手機操作</strong>：
             <ul>
-              <li>點擊下方工具切換「星星」或「叉叉」模式。</li>
+              <li>點擊下方「星星」或「叉叉」工具。</li>
               <li>切換到「叉叉」模式後，可在棋盤上<strong>滑動拖曳 (Swipe/Drag)</strong> 連續劃叉！</li>
             </ul>
           </li>
@@ -222,19 +224,17 @@
         <button class="modal-close-btn icon-btn-sm" aria-label="關閉">&times;</button>
       </div>
       <div class="modal-body">
-        <div id="stats-list" class="stats-list">
-          <!-- Populated by JS -->
-        </div>
+        <div id="stats-list" class="stats-list"></div>
       </div>
     </div>
   </div>
 
-  <!-- Victory Win Modal -->
+  <!-- Victory Modal -->
   <div id="win-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="win-title">
     <div class="modal-content win-content">
       <div class="win-trophy">🏆</div>
-      <h2 id="win-title" class="modal-title" style="color: var(--accent-gold); font-size: 1.5rem;">恭喜通關！</h2>
-      <p style="color: var(--text-secondary); margin-top: 4px; font-size: 0.9rem;">太棒了！您成功解開了星陣謎題！</p>
+      <h2 id="win-title" class="modal-title" style="color: var(--accent-gold); font-size: 1.4rem;">恭喜通關！</h2>
+      <p style="color: var(--text-secondary); margin-top: 4px; font-size: 0.85rem;">太棒了！您成功解開了星陣謎題！</p>
 
       <div class="win-stats-grid">
         <div class="win-stat-box">
@@ -255,7 +255,7 @@
         </div>
       </div>
 
-      <div style="display: flex; gap: 8px; justify-content: center; margin-top: 14px;">
+      <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
         <button id="win-share-btn" class="btn btn-accent" style="flex: 1;">
           <span>📤</span> 分享戰績
         </button>
@@ -266,6 +266,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/game.js"></script>
+  <script type="module" src="js/game.js?v=3.5"></script>
 </body>
 </html>
